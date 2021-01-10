@@ -1,0 +1,14 @@
+---
+- name: list clusters
+  command: k3d cluster list
+  register: _k3d_cluster_list
+
+- name: Does cluster already exist?
+  when: _k3d_cluster_list is not search(k3s_cluster_name)
+  block:
+    - name: create cluster
+      command: "k3d cluster create {{ k3s_cluster_name }}"
+
+- name: map the cluster config to kubectl
+  command: "k3d kubeconfig merge {{ k3s_cluster_name }} --switch-context"
+...

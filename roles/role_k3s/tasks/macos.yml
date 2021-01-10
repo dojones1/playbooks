@@ -1,0 +1,29 @@
+---
+- name: Check if k3d is present
+  command: k3d --version
+  register: _k3d_version
+  ignore_errors: true
+
+- name:
+  debug:
+    var: _k3d_version
+  
+- name: Install k3d
+  when: _k3d_version.failed
+  block:
+    - name: install k3d via brew
+      community.general.homebrew:
+        name: k3d
+        state: present
+        update_homebrew: true
+
+- name: pip3 install openshift
+  pip:
+    name: 
+      - openshift>=0.6
+      - PyYaml>=3.11
+    executable: pip3
+    extra_args: --user
+    state: present
+
+...

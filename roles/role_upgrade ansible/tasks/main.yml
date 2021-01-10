@@ -1,0 +1,8 @@
+---
+- name: install the latest pip package, force upgrade
+  pip:
+    name: pip
+    executable: pip3
+    extra_args: --upgrade
+    state: latest
+...

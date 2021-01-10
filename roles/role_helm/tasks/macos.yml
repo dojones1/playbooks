@@ -1,0 +1,26 @@
+---
+- name: Check if helm is present
+  command: helm version
+  register: _helm_version
+  ignore_errors: true
+
+- name:
+  debug:
+    var: _helm_version
+  
+- name: Install helm
+  when: _helm_version.failed
+  block:
+    - name: install helm via brew
+      community.general.homebrew:
+        name: helm
+        state: present
+        update_homebrew: true
+
+- name: Create a directory for helm variables
+  become: true
+  file:
+    path: /opt/helm
+    state: directory
+    mode: '0755'
+...

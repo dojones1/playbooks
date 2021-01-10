@@ -1,0 +1,17 @@
+---
+- name: Is k3s already installed?
+  ansible.builtin.stat: 
+    path: /etc/rancher/k3s/k3s.yaml
+  register: _k3s_stat
+
+- name: debug
+  debug:
+    var: _k3s_stat
+
+- name: Install k3s
+  when: not _k3s_stat.stat.exists
+  block:
+    - name: Install k3s
+      shell: curl -sfL https://get.k3s.io | sh -
+
+...

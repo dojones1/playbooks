@@ -1,0 +1,12 @@
+---
+- name: check for mandatory variables
+  assert:
+    that: ansible_os_family is defined
+    
+- name: run linux installer
+  when: ansible_os_family == 'debian'
+  include_tasks: linux.yml
+
+- name: run macos installer
+  when: ansible_os_family == 'Darwin'
+  include_tasks: macos.yml

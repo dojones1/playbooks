@@ -1,0 +1,8 @@
+---
+- name: Install k3s on master
+  hosts: k3s_masters
+  roles:
+    - role_k3s
+    - role_helm
+    - role_helm_jenkins
+...

@@ -1,0 +1,6 @@
+---
+- name: Upgrade pip3 / ansible
+  hosts: localhost
+  roles:
+    - role_upgrade_ansible
+...
