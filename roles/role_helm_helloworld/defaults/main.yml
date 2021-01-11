@@ -1,0 +1,3 @@
+---
+helloworld_namespace: helloworld
+helloworld_chart_path: "{{ helm_chart_install_path }}/helloworld" 

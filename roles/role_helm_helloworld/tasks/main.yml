@@ -1,0 +1,9 @@
+---
+- name: check for mandatory variables
+  assert:
+    that: ansible_os_family is defined
+
+- name: run installation
+  include_tasks: install.yml
+
+...

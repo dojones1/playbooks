@@ -23,17 +23,84 @@
     namespace: jenkins
     template: 'jenkins-sa.yml.j2'
 
-- name: Template a file to /opt/helm/jenkins-values.yml
-  become: true
-  copy:
-    src: jenkins-values.yml
-    dest: /opt/helm/jenkins-values.yml
-    mode: '0644'
+- name: Create Jenkins Deployment
+  community.kubernetes.k8s:
+    state: present
+    namespace: jenkins
+    template: 'jenkins-deployment.yml.j2'
 
-- name: Helm Install jenkins
-  community.kubernetes.helm:
+- name: Create Jenkins Service
+  community.kubernetes.k8s:
+    state: present
+    namespace: jenkins
+    template: 'jenkins-service.yml.j2'
+# - name: Template a file to /opt/helm/jenkins-values.yml
+#   become: true
+#   copy:
+#     src: jenkins-values.yml
+#     dest: /opt/helm/jenkins-values.yml
+#     mode: '0644'
+
+# - name: Helm Install jenkins
+#   community.kubernetes.helm:
+#     name: jenkins
+#     chart_ref: jenkinsci/jenkins
+#     release_namespace: jenkins
+#     values_files:
+#       - /opt/helm/jenkins-values.yml
+
+# Get your 'admin' user password by running:
+
+# - name: Get secret
+#   community.kubernetes.k8s_info:
+#     api_version: v1
+#     kind: Secret
+#     name: jenkins
+#     namespace: jenkins
+#   register: _jenkins_secret
+
+# - debug:
+#     var: _jenkins_secret
+
+# - name: convert secret
+#   set_fact: 
+#     _jenkins_secret_base64: "{{ _jenkins_secret.resources[0].data['jenkins-admin-password'] | b64decode }}"
+
+- name: Get services
+  community.kubernetes.k8s_info:
+    api_version: v1
+    kind: services
     name: jenkins
-    chart_ref: jenkinsci/jenkins
-    release_namespace: jenkins
-    values_files:
-      - /opt/helm/jenkins-values.yml
+    namespace: jenkins
+  register: _jenkins_services
+
+- debug:
+    var: _jenkins_services
+
+- name: Set _jenkins_port
+  set_fact:
+    _jenkins_port: "{{ _jenkins_services | json_query('resources[0].spec.ports[0].nodePort') }}"
+
+- debug:
+    var: _jenkins_port
+
+- name: Get nodes
+  community.kubernetes.k8s_info:
+    api_version: v1
+    kind: nodes
+    name: jenkins
+    namespace: jenkins
+  register: _jenkins_nodes
+
+- debug:
+    var: _jenkins_nodes
+# $ jsonpath="{.data.jenkins-admin-password}"
+# $ secret=$(kubectl get secret -n jenkins jenkins -o jsonpath=$jsonpath)
+# $ echo $(echo $secret | base64 --decode)
+# Get the Jenkins URL to visit by running these commands in the same shell:
+
+# $ jsonpath="{.spec.ports[0].nodePort}"
+# $ NODE_PORT=$(kubectl get -n jenkins -o jsonpath=$jsonpath services jenkins)
+# $ jsonpath="{.items[0].status.addresses[0].address}"
+# $ NODE_IP=$(kubectl get nodes -n jenkins -o jsonpath=$jsonpath)
+# $ echo http://$NODE_IP:$NODE_PORT/login

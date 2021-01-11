@@ -4,5 +4,5 @@
   roles:
     - role_k3s
     - role_helm
-    - role_helm_jenkins
+    - role_helm_helloworld
 ...

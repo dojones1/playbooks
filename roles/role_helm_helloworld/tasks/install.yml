@@ -1,0 +1,32 @@
+---
+- name: Create a helloworld namespace
+  community.kubernetes.k8s:
+    name: "{{ helloworld_namespace }}"
+    api_version: v1
+    kind: Namespace
+    state: present
+
+- name: Copy folders over to destination helm folder
+  become: true 
+  file:
+    state: directory
+    dest: '{{ helm_chart_install_path }}/{{ item.path }}'
+  with_filetree: '../charts'
+  when: item.state == 'directory'
+
+- name: copy files over to helm folder
+  become: true
+  copy:
+    src: '{{ item.src }}'
+    dest: '{{ helm_chart_install_path }}/{{ item.path }}'
+  with_filetree: '../charts'
+  when: item.state == 'file'
+
+- name: Helm Install helloworld
+  community.kubernetes.helm:
+    name: "{{ helloworld_namespace }}"
+    chart_ref: "{{ helloworld_chart_path }}"
+    release_namespace: helloworld
+    values_files:
+      - "{{ helm_chart_install_path }}/value.yml"
+...

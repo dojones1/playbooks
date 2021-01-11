@@ -20,7 +20,7 @@
 - name: Create a directory for helm variables
   become: true
   file:
-    path: /opt/helm
+    path: "{{ helm_chart_install_path }}"
     state: directory
     mode: '0755'
 ...
